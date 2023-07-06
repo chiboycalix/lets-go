@@ -9,7 +9,7 @@ type Movie struct {
 	CreatedAt time.Time `json:"-"` // omit from JSON
 	Title     string    `json:"title"`
 	Year      int32     `json:"year,omitempty"` // omit empty values
-	Runtime   int32     `json:"runtime,omitempty"`
+	Runtime   Runtime   `json:"runtime,omitempty"`
 	Genres    []string  `json:"genres,omitempty"`
 	Version   int32     `json:"version"`
 }
