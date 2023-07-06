@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -9,7 +8,25 @@ import (
 )
 
 func (app *application) createMovieHandler(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(res, "create a new movie")
+	var input struct {
+		Title   string   `json:"title"`
+		Year    int32    `json: "year"`
+		Runtime int32    `json:runtime`
+		Genres  []string `json:genres`
+	}
+
+	err := app.readJson(res, req, &input)
+	if err != nil {
+		app.errorResponse(res, req, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	env := envelope{"movie": input}
+
+	err = app.writeJson(res, http.StatusCreated, env, nil)
+	if err != nil {
+		app.badRequestResponse(res, req, err)
+	}
 }
 
 func (app *application) showMovieHandler(res http.ResponseWriter, req *http.Request) {

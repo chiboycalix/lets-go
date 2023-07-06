@@ -7,8 +7,8 @@ import (
 
 type Runtime int32
 
-func (r Runtime) MarshalJSON() ([]byte, error) {
-	jsonValue := fmt.Sprintf("%d mins", r)
+func (runtime Runtime) MarshalJSON() ([]byte, error) {
+	jsonValue := fmt.Sprintf("%d mins", runtime)
 
 	quotedJSONValue := strconv.Quote(jsonValue)
 
