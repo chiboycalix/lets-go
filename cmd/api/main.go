@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/chiboycalix/go-further/internal/data"
 	_ "github.com/lib/pq"
 )
 
@@ -29,6 +30,7 @@ type configuration struct {
 type application struct {
 	configuration configuration
 	logger        *log.Logger
+	models        data.Models
 }
 
 func main() {
@@ -36,19 +38,19 @@ func main() {
 
 	flag.IntVar(&config.port, "port", 1004, "API server port")
 	flag.StringVar(&config.env, "env", "development", "Environment (development|staging|production)")
-	flag.StringVar(&config.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostgreSQL DSN")
+	// flag.StringVar(&config.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostgreSQL DSN")
+	flag.StringVar(&config.db.dsn, "db-dsn", os.Getenv("MOVIE_DB_DSN"), "PostgreSQL DSN")
 	flag.IntVar(&config.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL Max open connection")
 	flag.IntVar(&config.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQ Max Idle connection")
 	flag.StringVar(&config.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQ Max Idle Time")
 	flag.Parse()
-
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	db, err := openDB(config)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// psql -U postgres
 	defer db.Close()
 
 	logger.Printf("database connection pool established")
@@ -56,6 +58,7 @@ func main() {
 	app := &application{
 		configuration: config,
 		logger:        logger,
+		models:        data.NewModels(db),
 	}
 
 	server := &http.Server{

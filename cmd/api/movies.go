@@ -1,8 +1,9 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/chiboycalix/go-further/internal/data"
 	"github.com/chiboycalix/go-further/internal/validator"
@@ -35,9 +36,19 @@ func (app *application) createMovieHandler(res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	env := envelope{"movie": input}
+	err = app.models.Movies.Insert(&movie)
+	if err != nil {
+		fmt.Println(err, "erro")
+		app.serverErrorResponse(res, req, err)
+		return
+	}
 
-	err = app.writeJson(res, http.StatusCreated, env, nil)
+	headers := make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/v1/movies/%d", movie.ID))
+
+	env := envelope{"movie": movie}
+
+	err = app.writeJson(res, http.StatusCreated, env, headers)
 	if err != nil {
 		app.badRequestResponse(res, req, err)
 	}
@@ -49,14 +60,15 @@ func (app *application) showMovieHandler(res http.ResponseWriter, req *http.Requ
 		app.notFoundResponse(res, req)
 		return
 	}
-
-	movie := data.Movie{
-		ID:        id,
-		CreatedAt: time.Now(),
-		Title:     "Casablanca",
-		Runtime:   102,
-		Genres:    []string{"drama", "romance", "war"},
-		Version:   1,
+	movie, err := app.models.Movies.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrorRecordNotFound):
+			app.notFoundResponse(res, req)
+		default:
+			app.serverErrorResponse(res, req, err)
+		}
+		return
 	}
 
 	err = app.writeJson(res, http.StatusOK, envelope{"movie": movie}, nil)
