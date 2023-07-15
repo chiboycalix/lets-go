@@ -160,17 +160,33 @@ func (app *application) deleteMovieHandler(res http.ResponseWriter, req *http.Re
 }
 
 func (app *application) showAllMovieHander(res http.ResponseWriter, req *http.Request) {
-	var movie struct {
-		Title   string       `json:"title"`
-		Year    int32        `json: "year"`
-		Runtime data.Runtime `json:runtime`
-		Genres  []string     `json:genres`
+	var input struct {
+		Title  string
+		Genres []string
+		data.Filter
 	}
-	err := app.models.Movies.GetAll()
+
+	v := validator.New()
+	qs := req.URL.Query()
+
+	input.Title = app.readString(qs, "title", "")
+	input.Genres = app.readCSV(qs, "genres", []string{})
+	input.Filter.Page = app.readInt(qs, "page", 1, v)
+	input.Filter.PageSize = app.readInt(qs, "pageSize", 10, v)
+	input.Filter.Sort = app.readString(qs, "sort", "id")
+	input.Filter.SortSafelist = []string{"id", "title", "year", "runtime", "-id", "-title", "-year", "-runtime"}
+
+	if data.ValidateFilters(v, input.Filter); !v.Valid() {
+		app.failedValidationResponse(res, req, v.Errors)
+		return
+	}
+
+	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filter)
 	if err != nil {
 		app.serverErrorResponse(res, req, err)
+		return
 	}
-	err = app.writeJson(res, http.StatusOK, envelope{"message": movie}, nil)
+	err = app.writeJson(res, http.StatusOK, envelope{"movies": movies}, nil)
 	if err != nil {
 		app.serverErrorResponse(res, req, err)
 	}
