@@ -181,12 +181,12 @@ func (app *application) showAllMovieHander(res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
+	movies, metadata, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(res, req, err)
 		return
 	}
-	err = app.writeJson(res, http.StatusOK, envelope{"movies": movies}, nil)
+	err = app.writeJson(res, http.StatusOK, envelope{"movies": movies, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(res, req, err)
 	}
