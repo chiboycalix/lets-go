@@ -163,7 +163,7 @@ func (app *application) showAllMovieHander(res http.ResponseWriter, req *http.Re
 	var input struct {
 		Title  string
 		Genres []string
-		data.Filter
+		data.Filters
 	}
 
 	v := validator.New()
@@ -171,17 +171,17 @@ func (app *application) showAllMovieHander(res http.ResponseWriter, req *http.Re
 
 	input.Title = app.readString(qs, "title", "")
 	input.Genres = app.readCSV(qs, "genres", []string{})
-	input.Filter.Page = app.readInt(qs, "page", 1, v)
-	input.Filter.PageSize = app.readInt(qs, "pageSize", 10, v)
-	input.Filter.Sort = app.readString(qs, "sort", "id")
-	input.Filter.SortSafelist = []string{"id", "title", "year", "runtime", "-id", "-title", "-year", "-runtime"}
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "pageSize", 10, v)
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.SortSafelist = []string{"id", "title", "year", "runtime", "-id", "-title", "-year", "-runtime"}
 
-	if data.ValidateFilters(v, input.Filter); !v.Valid() {
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
 		app.failedValidationResponse(res, req, v.Errors)
 		return
 	}
 
-	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filter)
+	movies, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(res, req, err)
 		return
