@@ -12,9 +12,9 @@ import (
 func (app *application) createMovieHandler(res http.ResponseWriter, req *http.Request) {
 	var input struct {
 		Title   string       `json:"title"`
-		Year    int32        `json: "year"`
-		Runtime data.Runtime `json:runtime`
-		Genres  []string     `json:genres`
+		Year    int32        `json:"year"`
+		Runtime data.Runtime `json:"runtime"`
+		Genres  []string     `json:"genres"`
 	}
 
 	err := app.readJson(res, req, &input)
