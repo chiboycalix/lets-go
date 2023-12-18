@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/chiboycalix/go-further/internal/data"
+	"github.com/chiboycalix/go-further/internal/jsonlog"
 	_ "github.com/lib/pq"
 )
 
@@ -29,8 +30,9 @@ type configuration struct {
 
 type application struct {
 	configuration configuration
-	logger        *log.Logger
-	models        data.Models
+	// logger        *log.Logger
+	logger *jsonlog.Logger
+	models data.Models
 }
 
 func main() {
@@ -43,16 +45,17 @@ func main() {
 	flag.IntVar(&config.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQ Max Idle connection")
 	flag.StringVar(&config.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQ Max Idle Time")
 	flag.Parse()
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	// logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	db, err := openDB(config)
 	if err != nil {
-		log.Fatal(err)
+		logger.PrintFatal(err, nil)
 	}
 	// psql -U postgres
 	defer db.Close()
 
-	logger.Printf("database connection pool established")
+	logger.PrintInfo("database connection pool established", nil)
 
 	app := &application{
 		configuration: config,
@@ -63,15 +66,19 @@ func main() {
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", config.port),
 		Handler:      app.routes(),
+		ErrorLog:     log.New(logger, "", 0),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 
 	//start http server
-	logger.Printf("Starting %s server on %s", config.env, server.Addr)
+	logger.PrintInfo("starting server", map[string]string{
+		"addr": server.Addr,
+		"env":  config.env,
+	})
 	err = server.ListenAndServe()
-	logger.Fatal(err)
+	logger.PrintFatal(err, nil)
 }
 
 func openDB(config configuration) (*sql.DB, error) {
