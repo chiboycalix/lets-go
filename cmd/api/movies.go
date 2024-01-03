@@ -211,7 +211,7 @@ func (app *application) patchMovieHandler(res http.ResponseWriter, req *http.Req
 
 	var input struct {
 		Title   *string       `json:"title"`
-		Year    *int32        `json: "year"`
+		Year    *int32        `json:"year"`
 		Runtime *data.Runtime `json:runtime`
 		Genres  []string      `json:genres`
 	}

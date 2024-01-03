@@ -30,9 +30,8 @@ type configuration struct {
 
 type application struct {
 	configuration configuration
-	// logger        *log.Logger
-	logger *jsonlog.Logger
-	models data.Models
+	logger        *jsonlog.Logger
+	models        data.Models
 }
 
 func main() {
@@ -45,7 +44,6 @@ func main() {
 	flag.IntVar(&config.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQ Max Idle connection")
 	flag.StringVar(&config.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQ Max Idle Time")
 	flag.Parse()
-	// logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	db, err := openDB(config)
