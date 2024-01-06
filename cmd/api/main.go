@@ -9,6 +9,7 @@ import (
 
 	"github.com/chiboycalix/go-further/internal/data"
 	"github.com/chiboycalix/go-further/internal/jsonlog"
+	"github.com/chiboycalix/go-further/internal/mailer"
 	_ "github.com/lib/pq"
 )
 
@@ -29,12 +30,21 @@ type configuration struct {
 		burst   int
 		enabled bool
 	}
+
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type application struct {
 	configuration configuration
 	logger        *jsonlog.Logger
 	models        data.Models
+	mailer        mailer.Mailer
 }
 
 func main() {
@@ -50,6 +60,12 @@ func main() {
 	flag.Float64Var(&config.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&config.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&config.limiter.enabled, "limiter-enabled", true, "Rate limiter enabled")
+
+	flag.StringVar(&config.smtp.host, "smtp-host", "smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&config.smtp.port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&config.smtp.username, "smtp-username", "704954e8d8805b", "SMTP username")
+	flag.StringVar(&config.smtp.password, "smtp-password", "293199d8d5c3a0", "SMTP password")
+	flag.StringVar(&config.smtp.sender, "smtp-sender", "Greenlight <no-reply@igwechinonso77@gmail.com>", "SMTP sender")
 
 	flag.Parse()
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
@@ -67,6 +83,7 @@ func main() {
 		configuration: config,
 		logger:        logger,
 		models:        data.NewModels(db),
+		mailer:        mailer.New(config.smtp.host, config.smtp.port, config.smtp.username, config.smtp.password, config.smtp.sender),
 	}
 
 	err = app.serve()
