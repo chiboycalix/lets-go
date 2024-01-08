@@ -51,7 +51,7 @@ func (app *application) registerUserHandler(res http.ResponseWriter, req *http.R
 		return
 	}
 
-	err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+	err = app.mailer.Send(user.Email, "welcome.tmpl", user)
 	if err != nil {
 		app.serverErrorResponse(res, req, err)
 		return

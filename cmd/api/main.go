@@ -61,11 +61,11 @@ func main() {
 	flag.IntVar(&config.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&config.limiter.enabled, "limiter-enabled", true, "Rate limiter enabled")
 
-	flag.StringVar(&config.smtp.host, "smtp-host", "smtp.mailtrap.io", "SMTP host")
-	flag.IntVar(&config.smtp.port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&config.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&config.smtp.port, "smtp-port", 2525, "SMTP port")
 	flag.StringVar(&config.smtp.username, "smtp-username", "704954e8d8805b", "SMTP username")
 	flag.StringVar(&config.smtp.password, "smtp-password", "293199d8d5c3a0", "SMTP password")
-	flag.StringVar(&config.smtp.sender, "smtp-sender", "Greenlight <no-reply@igwechinonso77@gmail.com>", "SMTP sender")
+	flag.StringVar(&config.smtp.sender, "smtp-sender", "GreenLight <igwechinonso77@gmail.com>", "SMTP sender")
 
 	flag.Parse()
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
