@@ -51,12 +51,12 @@ func (app *application) registerUserHandler(res http.ResponseWriter, req *http.R
 		return
 	}
 
-	go func() {
+	app.background(func() {
 		err = app.mailer.Send(user.Email, "welcome.tmpl", user)
 		if err != nil {
 			app.logger.PrintError(err, nil)
 		}
-	}()
+	})
 
 	if err != nil {
 		app.serverErrorResponse(res, req, err)
